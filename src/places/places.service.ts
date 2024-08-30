@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -41,7 +41,7 @@ export class PlacesService {
       const response = await firstValueFrom(this.httpService.get(url));
       return response.data.results;
     } catch (error) {
-      throw new Error(`Error al obtener lugares cercanos: ${error.message}`);
+      throw new BadRequestException(`Error al obtener lugares cercanos: ${error.message}`);
     }
   }
 
@@ -64,4 +64,24 @@ export class PlacesService {
 
     return placeData;
   }
+
+  async getSavedPlacesByAddress(address: string): Promise<any[]> {
+    try {
+      const places = await this.prisma.nearbyPlace.findMany({
+        where: { address },
+      });
+  
+      if (places.length === 0) {
+        throw new BadRequestException('No se encontraron lugares guardados para esta dirección.');
+      }
+  
+      return places;
+    } catch (error) {
+      throw new BadRequestException(`Error al obtener lugares guardados: ${error.message}`);
+    }
+  }
+
+  
+
+
 }
