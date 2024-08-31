@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { firstValueFrom } from 'rxjs';
+import { NearbyPlace } from '@prisma/client';
 
 @Injectable()
 export class PlacesService {
@@ -63,5 +64,26 @@ export class PlacesService {
     });
 
     return placeData;
+  }
+
+  async softDelete(id: number): Promise<void>{
+    const placeData = await this.prisma.nearbyPlace.findUnique({
+      where: {id: id},
+    })
+
+    if(!placeData){
+      throw new Error(`Not found place for id: ${id}`);
+    }
+    await this.prisma.nearbyPlace.update({
+      where: {id: id},
+      data: {deletedAt: new Date()},
+    });
+  }
+
+  async restore(id: number): Promise<NearbyPlace>{
+    return this.prisma.nearbyPlace.update({
+      where: {id},
+      data: {deletedAt: null},
+    });
   }
 }

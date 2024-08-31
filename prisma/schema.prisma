@@ -22,5 +22,6 @@ model NearbyPlace {
   placeName    String
   placeType    String
   createdAt    DateTime @default(now())
+  deletedAt    DateTime?
 }
 
